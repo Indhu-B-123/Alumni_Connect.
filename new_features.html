@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AlumniConnect — New Features</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#0d0f14;--surface:#161921;--card:#1e2230;--border:#2a2f42;
+    --accent:#4f8ef7;--accent2:#a78bfa;--gold:#f0c060;--green:#34d399;
+    --text:#e8eaf2;--muted:#7a80a0;--danger:#f87171;--nav:#0d0f14;
+  }
+  .light {
+    --bg:#f4f6fb;--surface:#fff;--card:#fff;--border:#dde1ec;
+    --accent:#2f6fe8;--accent2:#7c5ce8;--gold:#c47f0a;--green:#1a9e6a;
+    --text:#1a1d2e;--muted:#6b7191;--danger:#d94f4f;--nav:#fff;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; font-size:15px; transition:background .3s,color .3s; }
+  h2 { font-family:'Fraunces',serif; font-size:22px; margin-bottom:6px; }
+  p.sub { color:var(--muted); font-size:13px; margin-bottom:24px; }
+
+  /* NAV DEMO */
+  nav {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 36px; background:var(--nav); border-bottom:1px solid var(--border);
+    position:sticky; top:0; z-index:100;
+    transition:background .3s, border-color .3s;
+  }
+  .logo { font-family:'Fraunces',serif; font-size:20px; color:var(--accent); }
+  .logo span { color:var(--gold); }
+  .nav-right { display:flex; align-items:center; gap:14px; }
+
+  /* FEATURE 1 — DARK/LIGHT TOGGLE */
+  .toggle-wrap { display:flex; align-items:center; gap:8px; }
+  .toggle-label { font-size:13px; color:var(--muted); }
+  .toggle-track {
+    width:48px; height:26px; border-radius:13px; background:var(--border);
+    position:relative; cursor:pointer; transition:background .3s; border:none;
+    flex-shrink:0;
+  }
+  .toggle-track.on { background:var(--accent); }
+  .toggle-thumb {
+    position:absolute; top:3px; left:3px; width:20px; height:20px;
+    border-radius:50%; background:#fff; transition:transform .3s;
+    display:flex; align-items:center; justify-content:center; font-size:11px;
+  }
+  .toggle-track.on .toggle-thumb { transform:translateX(22px); }
+
+  /* FEATURE 2 — NOTIFICATION BELL */
+  .bell-btn {
+    position:relative; background:none; border:none; cursor:pointer;
+    padding:6px 8px; border-radius:8px; color:var(--muted);
+    font-size:20px; transition:background .2s;
+  }
+  .bell-btn:hover { background:var(--surface); }
+  .bell-badge {
+    position:absolute; top:2px; right:2px; width:17px; height:17px;
+    border-radius:50%; background:var(--danger); color:#fff;
+    font-size:10px; font-weight:700; display:flex; align-items:center;
+    justify-content:center; border:2px solid var(--nav);
+    font-family:'DM Sans',sans-serif;
+  }
+  .notif-panel {
+    position:absolute; top:58px; right:36px; width:340px;
+    background:var(--card); border:1px solid var(--border);
+    border-radius:14px; box-shadow:0 8px 32px rgba(0,0,0,.3);
+    z-index:200; display:none;
+    animation:popIn .15s ease;
+  }
+  .notif-panel.open { display:block; }
+  @keyframes popIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .notif-header {
+    padding:14px 18px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .notif-header h4 { font-size:15px; font-family:'Fraunces',serif; }
+  .notif-clear { font-size:12px; color:var(--accent); cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; }
+  .notif-item {
+    display:flex; gap:12px; padding:14px 18px;
+    border-bottom:1px solid var(--border); align-items:flex-start;
+    transition:background .15s; cursor:pointer;
+  }
+  .notif-item:last-child { border-bottom:none; }
+  .notif-item:hover { background:var(--surface); }
+  .notif-item.unread { border-left:3px solid var(--accent); }
+  .notif-dot {
+    width:36px; height:36px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:16px;
+  }
+  .notif-dot.blue { background:rgba(79,142,247,.15); }
+  .notif-dot.green { background:rgba(52,211,153,.15); }
+  .notif-dot.gold { background:rgba(240,192,96,.15); }
+  .notif-dot.red { background:rgba(248,113,113,.15); }
+  .notif-title { font-size:13px; font-weight:500; margin-bottom:2px; }
+  .notif-desc { font-size:12px; color:var(--muted); line-height:1.4; }
+  .notif-time { font-size:11px; color:var(--muted); margin-top:3px; }
+  .notif-footer { padding:12px 18px; text-align:center; }
+  .notif-footer a { font-size:13px; color:var(--accent); cursor:pointer; }
+
+  /* PAGE BODY */
+  .container { max-width:860px; margin:0 auto; padding:44px 36px; }
+  .feature-block { margin-bottom:52px; }
+  .feature-label {
+    display:inline-flex; align-items:center; gap:7px;
+    background:rgba(79,142,247,.1); border:1px solid rgba(79,142,247,.25);
+    color:var(--accent); padding:4px 12px; border-radius:20px;
+    font-size:12px; font-weight:500; margin-bottom:14px;
+  }
+  .divider { height:1px; background:var(--border); margin:44px 0; }
+
+  /* FEATURE 3 — ALUMNI MAP */
+  .map-box {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:24px;
+  }
+  .map-area {
+    position:relative; background:var(--surface); border-radius:10px;
+    border:1px solid var(--border); overflow:hidden; height:320px;
+  }
+  .map-svg { width:100%; height:100%; opacity:.15; }
+  .dot-layer { position:absolute; top:0; left:0; width:100%; height:100%; }
+  .alumni-dot {
+    position:absolute; transform:translate(-50%,-50%);
+    cursor:pointer;
+  }
+  .dot-ring {
+    width:14px; height:14px; border-radius:50%;
+    border:2px solid currentColor; animation:ripple 2.2s infinite;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .dot-ring::after {
+    content:''; width:6px; height:6px; border-radius:50%;
+    background:currentColor; display:block;
+  }
+  .dot-ring.blue { color:var(--accent); }
+  .dot-ring.gold { color:var(--gold); animation-delay:.4s; }
+  .dot-ring.green { color:var(--green); animation-delay:.8s; }
+  @keyframes ripple {
+    0%,100% { box-shadow:0 0 0 0 currentColor; opacity:1; }
+    60% { box-shadow:0 0 0 7px transparent; opacity:.7; }
+  }
+  .map-tooltip {
+    position:absolute; background:var(--card); border:1px solid var(--border);
+    border-radius:8px; padding:8px 12px; font-size:12px; pointer-events:none;
+    white-space:nowrap; z-index:10; display:none;
+    box-shadow:0 4px 16px rgba(0,0,0,.25);
+  }
+  .map-tooltip .tt-city { font-weight:500; font-size:13px; margin-bottom:2px; }
+  .map-tooltip .tt-count { color:var(--muted); }
+  .map-legend {
+    display:flex; gap:20px; margin-top:16px; flex-wrap:wrap;
+  }
+  .legend-item { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--muted); }
+  .legend-dot { width:10px; height:10px; border-radius:50%; }
+  .map-stats {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px;
+  }
+  .map-stat {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:10px; padding:12px; text-align:center;
+  }
+  .map-stat-num { font-family:'Fraunces',serif; font-size:22px; color:var(--accent); }
+  .map-stat-label { font-size:12px; color:var(--muted); margin-top:2px; }
+
+  /* FEATURE 4 — PROFILE COMPLETENESS */
+  .profile-card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:14px; padding:24px; max-width:540px;
+  }
+  .profile-top { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+  .profile-avatar {
+    width:56px; height:56px; border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-size:22px; color:#fff; flex-shrink:0;
+  }
+  .profile-name { font-size:17px; font-weight:500; }
+  .profile-role { font-size:13px; color:var(--muted); }
+  .complete-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+  .complete-label { font-size:13px; font-weight:500; }
+  .complete-pct { font-family:'Fraunces',serif; font-size:20px; color:var(--gold); }
+  .progress-track {
+    height:10px; background:var(--border); border-radius:5px;
+    overflow:hidden; margin-bottom:18px;
+  }
+  .progress-fill {
+    height:100%; border-radius:5px;
+    background:linear-gradient(90deg,var(--accent),var(--gold));
+    transition:width .8s ease;
+  }
+  .checklist { display:flex; flex-direction:column; gap:10px; }
+  .check-item {
+    display:flex; align-items:center; gap:12px; padding:10px 14px;
+    border-radius:10px; border:1px solid var(--border);
+    background:var(--surface); transition:border-color .2s;
+    cursor:pointer;
+  }
+  .check-item:hover { border-color:var(--accent); }
+  .check-item.done { border-color:rgba(52,211,153,.3); }
+  .check-icon {
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+  }
+  .check-icon.done { background:rgba(52,211,153,.15); color:var(--green); }
+  .check-icon.todo { background:var(--border); color:var(--muted); }
+  .check-text { flex:1; }
+  .check-title { font-size:13px; font-weight:500; }
+  .check-hint { font-size:12px; color:var(--muted); }
+  .check-pts { font-size:12px; color:var(--accent); font-weight:500; }
+  .complete-tip {
+    margin-top:16px; padding:12px 16px;
+    background:rgba(240,192,96,.08); border:1px solid rgba(240,192,96,.25);
+    border-radius:10px; font-size:13px; color:var(--gold);
+    display:flex; align-items:center; gap:10px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV with all 3 nav features built in -->
+<nav>
+  <div class="logo" onclick="showSection('home')">Alumni<span>Connect</span></div>
+  <div class="nav-right">
+
+    <!-- FEATURE 1: Theme toggle -->
+    <div class="toggle-wrap">
+      <span class="toggle-label" id="theme-label">🌙 Dark</span>
+      <button class="toggle-track" id="theme-toggle" onclick="toggleTheme()">
+        <div class="toggle-thumb">🌙</div>
+      </button>
+    </div>
+
+    <!-- FEATURE 2: Notification bell -->
+    <button class="bell-btn" onclick="toggleNotif()" id="bell-btn">
+      🔔
+      <div class="notif-badge" id="notif-badge">4</div>
+    </button>
+
+  </div>
+</nav>
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-header">
+    <h4>Notifications</h4>
+    <button class="notif-clear" onclick="clearAll()">Mark all read</button>
+  </div>
+
+  <div class="notif-item unread">
+    <div class="notif-dot blue">💬</div>
+    <div>
+      <div class="notif-title">New message from Arjun Mehta</div>
+      <div class="notif-desc">Sure, let's connect Friday for the mock interview!</div>
+      <div class="notif-time">2 minutes ago</div>
+    </div>
+  </div>
+  <div class="notif-item unread">
+    <div class="notif-dot green">🤝</div>
+    <div>
+      <div class="notif-title">Mentorship request accepted</div>
+      <div class="notif-desc">Karthik Raj accepted your mentorship request.</div>
+      <div class="notif-time">1 hour ago</div>
+    </div>
+  </div>
+  <div class="notif-item unread">
+    <div class="notif-dot gold">📅</div>
+    <div>
+      <div class="notif-title">Event reminder</div>
+      <div class="notif-desc">Annual Alumni Meet 2026 is in 6 days — 360 attending!</div>
+      <div class="notif-time">3 hours ago</div>
+    </div>
+  </div>
+  <div class="notif-item unread">
+    <div class="notif-dot red">⭐</div>
+    <div>
+      <div class="notif-title">Complete your profile</div>
+      <div class="notif-desc">You're at 70% — add LinkedIn to boost your visibility.</div>
+      <div class="notif-time">Yesterday</div>
+    </div>
+  </div>
+
+  <div class="notif-footer">
+    <a>View all notifications</a>
+  </div>
+</div>
+
+<!-- PAGE CONTENT -->
+<div class="container">
+
+  <div style="text-align:center;margin-bottom:44px;">
+    <div style="font-family:'Fraunces',serif;font-size:13px;color:var(--muted);margin-bottom:8px;">4 new features added to AlumniConnect</div>
+    <h2 style="font-size:34px;margin-bottom:10px;">Feature preview</h2>
+    <p style="color:var(--muted);font-size:15px;">Try the toggle, bell, map, and profile bar below.</p>
+  </div>
+
+  <!-- FEATURE 1 DEMO BLOCK -->
+  <div class="feature-block">
+    <div class="feature-label">✦ Feature 1</div>
+    <h2>Dark / Light mode toggle</h2>
+    <p class="sub">Use the toggle in the top-right nav bar to switch between dark and light mode instantly.</p>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 24px;display:flex;align-items:center;gap:16px;">
+        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;color:#fff;font-size:18px;">P</div>
+        <div>
+          <div style="font-weight:500;">Priya Sharma</div>
+          <div style="font-size:13px;color:var(--muted);">Software Engineer · Google</div>
+        </div>
+        <span style="padding:4px 10px;border-radius:20px;font-size:12px;background:rgba(52,211,153,.15);color:var(--green);">Active</span>
+      </div>
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 24px;display:flex;align-items:center;gap:12px;">
+        <div style="font-size:13px;color:var(--muted);">Toggle in nav → watch this card adapt live</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FEATURE 2 DEMO BLOCK -->
+  <div class="feature-block">
+    <div class="feature-label">✦ Feature 2</div>
+    <h2>Notification bell</h2>
+    <p class="sub">Click the 🔔 bell icon in the top-right to see pending mentorship requests, event reminders, and new messages.</p>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 24px;">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:12px;">What triggers a notification:</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="color:var(--accent);">💬</span> New message from alumni</div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="color:var(--green);">🤝</span> Mentorship request accepted</div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="color:var(--gold);">📅</span> Upcoming event reminder</div>
+        <div style="display:flex;gap:10px;align-items:center;font-size:13px;"><span style="color:var(--danger);">⭐</span> Profile incomplete alert</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FEATURE 3 — ALUMNI MAP -->
+  <div class="feature-block">
+    <div class="feature-label">✦ Feature 3</div>
+    <h2>Alumni world map</h2>
+    <p class="sub">Hover over any glowing dot to see the city and alumni count. Shows where your network lives globally.</p>
+    <div class="map-box">
+      <div class="map-area" id="map-area">
+        <!-- World map SVG background -->
+        <svg class="map-svg" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
+          <!-- North America -->
+          <path d="M80 100 Q140 80 220 95 Q290 90 340 115 Q370 135 375 170 Q378 210 355 235 Q330 258 295 255 Q255 265 215 250 Q175 248 145 228 Q110 205 90 175 Q72 148 80 100Z" fill="var(--accent)" opacity="0.5"/>
+          <!-- South America -->
+          <path d="M220 270 Q270 255 310 268 Q348 278 355 310 Q362 345 348 375 Q330 408 300 418 Q268 425 242 410 Q215 393 208 360 Q200 325 210 295 Q215 280 220 270Z" fill="var(--accent)" opacity="0.5"/>
+          <!-- Europe -->
+          <path d="M430 80 Q480 65 530 75 Q575 78 610 100 Q635 118 638 148 Q640 178 622 196 Q598 215 568 213 Q535 220 505 208 Q472 198 452 175 Q432 152 430 120 Q428 98 430 80Z" fill="var(--accent)" opacity="0.5"/>
+          <!-- Africa -->
+          <path d="M455 225 Q505 210 548 222 Q590 232 600 265 Q612 300 605 335 Q598 370 575 392 Q548 412 515 408 Q480 406 458 385 Q434 360 430 325 Q425 288 435 258 Q443 238 455 225Z" fill="var(--accent)" opacity="0.5"/>
+          <!-- Asia -->
+          <path d="M620 60 Q700 40 790 55 Q860 62 910 90 Q948 112 952 150 Q956 190 932 215 Q900 242 858 240 Q812 248 768 232 Q724 220 692 195 Q658 170 642 138 Q625 105 620 60Z" fill="var(--accent)" opacity="0.5"/>
+          <!-- South Asia bump (India) -->
+          <path d="M720 235 Q750 228 775 240 Q798 252 800 278 Q802 305 782 320 Q760 335 738 328 Q714 320 707 298 Q700 272 710 252 Q714 241 720 235Z" fill="var(--accent)" opacity="0.6"/>
+          <!-- Australia -->
+          <path d="M820 310 Q875 295 918 310 Q952 322 955 352 Q958 383 935 400 Q908 418 875 412 Q840 408 820 388 Q798 365 800 340 Q800 321 820 310Z" fill="var(--accent)" opacity="0.5"/>
+        </svg>
+
+        <!-- Dots layer -->
+        <div class="dot-layer">
+          <!-- India -->
+          <div class="alumni-dot" style="left:72%;top:56%" onmousemove="showTip(event,'Bengaluru, India','312 alumni')" onmouseleave="hideTip()"><div class="dot-ring gold" style="width:18px;height:18px;"></div></div>
+          <div class="alumni-dot" style="left:70%;top:50%" onmousemove="showTip(event,'Mumbai, India','198 alumni')" onmouseleave="hideTip()"><div class="dot-ring blue"></div></div>
+          <div class="alumni-dot" style="left:73%;top:48%" onmousemove="showTip(event,'Hyderabad, India','175 alumni')" onmouseleave="hideTip()"><div class="dot-ring blue"></div></div>
+          <div class="alumni-dot" style="left:71%;top:58%" onmousemove="showTip(event,'Chennai, India','143 alumni')" onmouseleave="hideTip()"><div class="dot-ring green"></div></div>
+          <div class="alumni-dot" style="left:68%;top:46%" onmousemove="showTip(event,'Delhi, India','121 alumni')" onmouseleave="hideTip()"><div class="dot-ring blue"></div></div>
+          <!-- USA -->
+          <div class="alumni-dot" style="left:18%;top:38%" onmousemove="showTip(event,'San Francisco, USA','89 alumni')" onmouseleave="hideTip()"><div class="dot-ring blue"></div></div>
+          <div class="alumni-dot" style="left:25%;top:40%" onmousemove="showTip(event,'New York, USA','76 alumni')" onmouseleave="hideTip()"><div class="dot-ring blue"></div></div>
+          <!-- UK -->
+          <div class="alumni-dot" style="left:46%;top:26%" onmousemove="showTip(event,'London, UK','54 alumni')" onmouseleave="hideTip()"><div class="dot-ring blue"></div></div>
+          <!-- Germany -->
+          <div class="alumni-dot" style="left:51%;top:28%" onmousemove="showTip(event,'Berlin, Germany','32 alumni')" onmouseleave="hideTip()"><div class="dot-ring blue"></div></div>
+          <!-- Singapore -->
+          <div class="alumni-dot" style="left:80%;top:62%" onmousemove="showTip(event,'Singapore','67 alumni')" onmouseleave="hideTip()"><div class="dot-ring gold"></div></div>
+          <!-- Canada -->
+          <div class="alumni-dot" style="left:19%;top:28%" onmousemove="showTip(event,'Toronto, Canada','41 alumni')" onmouseleave="hideTip()"><div class="dot-ring green"></div></div>
+          <!-- UAE -->
+          <div class="alumni-dot" style="left:62%;top:46%" onmousemove="showTip(event,'Dubai, UAE','55 alumni')" onmouseleave="hideTip()"><div class="dot-ring gold"></div></div>
+          <!-- Australia -->
+          <div class="alumni-dot" style="left:88%;top:74%" onmousemove="showTip(event,'Melbourne, Australia','28 alumni')" onmouseleave="hideTip()"><div class="dot-ring green"></div></div>
+        </div>
+
+        <div class="map-tooltip" id="map-tip">
+          <div class="tt-city" id="tip-city"></div>
+          <div class="tt-count" id="tip-count"></div>
+        </div>
+      </div>
+
+      <div class="map-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--gold);"></div>300+ alumni</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--accent);"></div>50–299 alumni</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--green);"></div>Under 50 alumni</div>
+      </div>
+
+      <div class="map-stats">
+        <div class="map-stat"><div class="map-stat-num">2,418</div><div class="map-stat-label">Total alumni</div></div>
+        <div class="map-stat"><div class="map-stat-num" style="color:var(--gold);">18</div><div class="map-stat-label">Countries</div></div>
+        <div class="map-stat"><div class="map-stat-num" style="color:var(--green);">42</div><div class="map-stat-label">Cities</div></div>
+        <div class="map-stat"><div class="map-stat-num" style="color:var(--accent2);">1,820</div><div class="map-stat-label">Based in India</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- FEATURE 4 — PROFILE COMPLETENESS -->
+  <div class="feature-block">
+    <div class="feature-label">✦ Feature 4</div>
+    <h2>Profile completeness bar</h2>
+    <p class="sub">Click any incomplete item below to mark it done — watch the progress bar fill up live.</p>
+
+    <div class="profile-card">
+      <div class="profile-top">
+        <div class="profile-avatar">P</div>
+        <div>
+          <div class="profile-name">Priya Sharma</div>
+          <div class="profile-role">Software Engineer · Google · CSE 2024</div>
+        </div>
+      </div>
+
+      <div class="complete-header">
+        <span class="complete-label">Profile completeness</span>
+        <span class="complete-pct" id="pct-label">70%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-bar" style="width:70%;"></div>
+      </div>
+
+      <div class="checklist" id="checklist">
+        <div class="check-item done" data-pts="10" onclick="toggleItem(this)">
+          <div class="check-icon done">✓</div>
+          <div class="check-text">
+            <div class="check-title">Basic info added</div>
+            <div class="check-hint">Name, department, graduation year</div>
+          </div>
+          <div class="check-pts">+10pts</div>
+        </div>
+        <div class="check-item done" data-pts="15" onclick="toggleItem(this)">
+          <div class="check-icon done">✓</div>
+          <div class="check-text">
+            <div class="check-title">Job details filled</div>
+            <div class="check-hint">Role, company, location</div>
+          </div>
+          <div class="check-pts">+15pts</div>
+        </div>
+        <div class="check-item done" data-pts="10" onclick="toggleItem(this)">
+          <div class="check-icon done">✓</div>
+          <div class="check-text">
+            <div class="check-title">Bio written</div>
+            <div class="check-hint">Short intro for students</div>
+          </div>
+          <div class="check-pts">+10pts</div>
+        </div>
+        <div class="check-item done" data-pts="15" onclick="toggleItem(this)">
+          <div class="check-icon done">✓</div>
+          <div class="check-text">
+            <div class="check-title">Mentor topics selected</div>
+            <div class="check-hint">Areas you can guide students in</div>
+          </div>
+          <div class="check-pts">+15pts</div>
+        </div>
+        <div class="check-item" data-pts="20" onclick="toggleItem(this)">
+          <div class="check-icon todo">○</div>
+          <div class="check-text">
+            <div class="check-title">Add LinkedIn profile</div>
+            <div class="check-hint">Increases trust with students</div>
+          </div>
+          <div class="check-pts">+20pts</div>
+        </div>
+        <div class="check-item" data-pts="15" onclick="toggleItem(this)">
+          <div class="check-icon todo">○</div>
+          <div class="check-text">
+            <div class="check-title">Upload profile photo</div>
+            <div class="check-hint">Profiles with photos get 3x more requests</div>
+          </div>
+          <div class="check-pts">+15pts</div>
+        </div>
+        <div class="check-item" data-pts="15" onclick="toggleItem(this)">
+          <div class="check-icon todo">○</div>
+          <div class="check-text">
+            <div class="check-title">Accept first mentorship request</div>
+            <div class="check-hint">Help a student get started</div>
+          </div>
+          <div class="check-pts">+15pts</div>
+        </div>
+      </div>
+
+      <div class="complete-tip" id="complete-tip">
+        ✦ Add your LinkedIn to jump from 70% → 90% and get more mentorship requests!
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // FEATURE 1 — DARK / LIGHT TOGGLE
+  function toggleTheme() {
+    const root = document.documentElement;
+    const toggle = document.getElementById('theme-toggle');
+    const label = document.getElementById('theme-label');
+    const isLight = root.classList.contains('light');
+    if (isLight) {
+      root.classList.remove('light');
+      toggle.querySelector('.toggle-thumb').textContent = '🌙';
+      label.textContent = '🌙 Dark';
+    } else {
+      root.classList.add('light');
+      toggle.querySelector('.toggle-thumb').textContent = '☀️';
+      label.textContent = '☀️ Light';
+    }
+    toggle.classList.toggle('on', !isLight);
+  }
+
+  // FEATURE 2 — NOTIFICATION BELL
+  function toggleNotif() {
+    document.getElementById('notif-panel').classList.toggle('open');
+  }
+  function clearAll() {
+    document.querySelectorAll('.notif-item.unread').forEach(el => el.classList.remove('unread'));
+    document.getElementById('notif-badge').style.display = 'none';
+    document.getElementById('notif-panel').classList.remove('open');
+  }
+  document.addEventListener('click', function(e) {
+    const panel = document.getElementById('notif-panel');
+    const bell = document.getElementById('bell-btn');
+    if (!panel.contains(e.target) && !bell.contains(e.target)) {
+      panel.classList.remove('open');
+    }
+  });
+
+  // FEATURE 3 — MAP TOOLTIP
+  function showTip(e, city, count) {
+    const tip = document.getElementById('map-tip');
+    const map = document.getElementById('map-area');
+    const rect = map.getBoundingClientRect();
+    document.getElementById('tip-city').textContent = city;
+    document.getElementById('tip-count').textContent = count;
+    tip.style.display = 'block';
+    let x = e.clientX - rect.left + 14;
+    let y = e.clientY - rect.top - 40;
+    if (x + 160 > rect.width) x = e.clientX - rect.left - 160;
+    if (y < 0) y = e.clientY - rect.top + 20;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+  function hideTip() {
+    document.getElementById('map-tip').style.display = 'none';
+  }
+
+  // FEATURE 4 — PROFILE COMPLETENESS
+  const TOTAL_PTS = 100;
+  function calcPct() {
+    let done = 0;
+    document.querySelectorAll('.check-item').forEach(item => {
+      if (item.classList.contains('done')) done += parseInt(item.dataset.pts);
+    });
+    return Math.min(100, done);
+  }
+  function updateBar() {
+    const pct = calcPct();
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('pct-label').textContent = pct + '%';
+    const tip = document.getElementById('complete-tip');
+    if (pct === 100) {
+      tip.textContent = '🎉 Profile complete! Students can now find you easily.';
+      tip.style.background = 'rgba(52,211,153,.08)';
+      tip.style.borderColor = 'rgba(52,211,153,.3)';
+      tip.style.color = 'var(--green)';
+    } else {
+      tip.textContent = '✦ Click any incomplete item above to fill it in and boost your visibility!';
+      tip.style.background = '';
+      tip.style.borderColor = '';
+      tip.style.color = '';
+    }
+  }
+  function toggleItem(el) {
+    const isDone = el.classList.toggle('done');
+    const icon = el.querySelector('.check-icon');
+    if (isDone) {
+      icon.textContent = '✓';
+      icon.className = 'check-icon done';
+    } else {
+      icon.textContent = '○';
+      icon.className = 'check-icon todo';
+    }
+    updateBar();
+  }
+</script>
+</body>
+</html>
